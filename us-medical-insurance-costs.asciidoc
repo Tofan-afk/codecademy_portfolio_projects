@@ -1,0 +1,145 @@
++*In[4]:*+
+[source, ipython3]
+----
+#import libraries
+import json, csv, numpy, pandas
+----
+
+
++*In[6]:*+
+[source, ipython3]
+----
+#create dataset and open the csv:
+dataset = pandas.DataFrame()
+with open('insurance.csv') as insure:
+    dataset = pandas.read_csv(insure)
+    print(dataset)
+----
+
+
++*Out[6]:*+
+----
+      age     sex     bmi  children smoker     region      charges
+0      19  female  27.900         0    yes  southwest  16884.92400
+1      18    male  33.770         1     no  southeast   1725.55230
+2      28    male  33.000         3     no  southeast   4449.46200
+3      33    male  22.705         0     no  northwest  21984.47061
+4      32    male  28.880         0     no  northwest   3866.85520
+...   ...     ...     ...       ...    ...        ...          ...
+1333   50    male  30.970         3     no  northwest  10600.54830
+1334   18  female  31.920         0     no  northeast   2205.98080
+1335   18  female  36.850         0     no  southeast   1629.83350
+1336   21  female  25.800         0     no  southwest   2007.94500
+1337   61  female  29.070         0    yes  northwest  29141.36030
+
+[1338 rows x 7 columns]
+----
+
+
++*In[8]:*+
+[source, ipython3]
+----
+dataset.info()
+----
+
+
++*Out[8]:*+
+----
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 1338 entries, 0 to 1337
+Data columns (total 7 columns):
+ #   Column    Non-Null Count  Dtype  
+---  ------    --------------  -----  
+ 0   age       1338 non-null   int64  
+ 1   sex       1338 non-null   object 
+ 2   bmi       1338 non-null   float64
+ 3   children  1338 non-null   int64  
+ 4   smoker    1338 non-null   object 
+ 5   region    1338 non-null   object 
+ 6   charges   1338 non-null   float64
+dtypes: float64(2), int64(2), object(3)
+memory usage: 73.3+ KB
+----
+
+
++*In[10]:*+
+[source, ipython3]
+----
+def smoking_impact(dataset):
+    smoker = round(dataset.query('smoker == "yes"').charges.mean(), 2)
+    nsmoker = round(dataset.query('smoker == "no"').charges.mean(), 2)
+    print('Mean of smokers: {}$'.format(smoker))
+    print('Mean of non-smokers: {}$'.format(nsmoker))
+    print('There is a price difference of {}$ between smokers and non-smokers'.format(smoker - nsmoker))
+smoking_impact(dataset)
+----
+
+
++*Out[10]:*+
+----
+Mean of smokers: 32050.23$
+Mean of non-smokers: 8434.27$
+There is a price difference of 23615.96$ between smokers and non-smokers
+----
+
+
++*In[12]:*+
+[source, ipython3]
+----
+dataset.region.value_counts()
+----
+
+
++*Out[12]:*+
+----region
+southeast    364
+southwest    325
+northwest    325
+northeast    324
+Name: count, dtype: int64----
+
+
++*In[14]:*+
+[source, ipython3]
+----
+def average_bmi_across_regions(dataset, reg):
+    mean_bmi = round(dataset.query('region == "{}"'.format(reg)).bmi.mean(),2)
+    mean_charges = round(dataset.query('region == "{}"'.format(reg)).charges.mean(), 2)
+    print('On the selected region, {}, the average bmi is {}, and the average charges are {}$.'.format(reg, mean_bmi, mean_charges))
+average_bmi_across_regions(dataset, 'southwest')
+average_bmi_across_regions(dataset, 'northwest')
+average_bmi_across_regions(dataset, 'southeast')
+average_bmi_across_regions(dataset, 'northeast')
+----
+
+
++*Out[14]:*+
+----
+On the selected region, southwest, the average bmi is 30.6, and the average charges are 12346.94$.
+On the selected region, northwest, the average bmi is 29.2, and the average charges are 12417.58$.
+On the selected region, southeast, the average bmi is 33.36, and the average charges are 14735.41$.
+On the selected region, northeast, the average bmi is 29.17, and the average charges are 13406.38$.
+----
+
+
++*In[40]:*+
+[source, ipython3]
+----
+def children_impact(dataset):
+    grouped_data = dataset[['charges', 'children']].groupby(by="children").mean()
+    print(grouped_data)
+children_impact(dataset)
+----
+
+
++*Out[40]:*+
+----
+               charges
+children              
+0         12365.975602
+1         12731.171832
+2         15073.563734
+3         15355.318367
+4         13850.656311
+5          8786.035247
+----
